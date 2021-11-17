@@ -12,7 +12,7 @@ use std::fs::File;
 use crate::{dimacs_parser::parse_dimacs, solver::Solver};
 
 fn main() {
-    env::set_var("RUST_LOG", "trace");
+    env::set_var("RUST_LOG", "info");
     logger::init();
 
     let args: Vec<String> = env::args().collect();
@@ -30,7 +30,7 @@ fn main() {
         println!("UNSATISFIABLE");
     }
 
-    let st = solver.solver_solve();
+    let st = solver.solve().unwrap();
     if st {
         println!("SATISFIABLE");
     } else {

@@ -2,17 +2,32 @@ use std::cmp;
 
 #[derive(Debug, Clone, Copy, Eq)]
 pub enum Literal {
-    Pos(u32),
-    Neg(u32),
+    Pos(usize),
+    Neg(usize),
 }
 
 impl Literal {
     pub fn is_same_var(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Literal::Pos(x), Literal::Pos(y)) |
-            (Literal::Pos(x), Literal::Neg(y)) |
-            (Literal::Neg(x), Literal::Pos(y)) |
-            (Literal::Neg(x), Literal::Neg(y)) => x == y,
+        self.var() == other.var()
+    }
+
+    pub fn var(&self) -> usize {
+        match self {
+            Self::Pos(v) | Self::Neg(v) => *v,
+        }
+    }
+
+    pub fn is_pos(&self) -> bool {
+        match self {
+            Self::Pos(_) => true,
+            Self::Neg(_) => false,
+        }
+    }
+
+    pub fn not(&self) -> Self {
+        match self {
+            Self::Pos(v) => Self::Neg(*v),
+            Self::Neg(v) => Self::Pos(*v),
         }
     }
 }
@@ -29,14 +44,14 @@ impl Ord for Literal {
             (Self::Pos(p1), Self::Pos(p2)) | (Self::Neg(p1), Self::Neg(p2)) => {
                 p1.cmp(p2)
             },
-            (Literal::Pos(p1), Literal::Neg(p2)) => {
+            (Self::Pos(p1), Self::Neg(p2)) => {
                 if p1 == p2 {
                     cmp::Ordering::Less
                 } else {
                     p1.cmp(p2)
                 }
             },
-            (Literal::Neg(p1), Literal::Pos(p2)) => {
+            (Self::Neg(p1), Self::Pos(p2)) => {
                 if p1 == p2 {
                     cmp::Ordering::Greater
                 } else {

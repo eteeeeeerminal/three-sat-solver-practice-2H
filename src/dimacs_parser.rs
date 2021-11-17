@@ -30,10 +30,12 @@ fn line_to_clause(line: &str) -> Clause {
         if lit_raw_data == 0 {
             break;
         }
+        let lit_var_n: i32 = lit_raw_data.abs();
+        let lit_var_n: usize = (lit_var_n - 1).try_into().unwrap();
         if lit_raw_data > 0 {
-            clause.push(Literal::Pos(lit_raw_data.try_into().unwrap()));
+            clause.push(Literal::Pos(lit_var_n));
         } else {
-            clause.push(Literal::Neg(lit_raw_data.abs().try_into().unwrap()));
+            clause.push(Literal::Neg(lit_var_n));
         }
     }
     clause
@@ -41,12 +43,18 @@ fn line_to_clause(line: &str) -> Clause {
 
 /// # Returns
 /// * `true` - 読み込み成功
-/// * `false` - ファイル形式が違っている || empty clause があって解けない場合
+/// * `false` - 解けない
+///   - ファイル形式が違っている
+///   - empty clause があって解けない場合
+///   - x and ¬x があって解けない場合
 pub fn parse_dimacs(cnf_data: &mut str, solver: &mut Solver) -> bool {
     let lines: Vec<&str> = cnf_data.split('\n').collect();
 
     for line in lines {
         if is_comment_line(line) || is_probrem_line(line) {
+            continue;
+        }
+        if line.len() == 0 {
             continue;
         }
 
