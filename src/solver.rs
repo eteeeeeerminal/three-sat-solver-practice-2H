@@ -43,6 +43,15 @@ pub fn normalize_clause(clause: &mut Clause) -> Result<Clause, NormalizeError> {
     Ok(ret_clause)
 }
 
+/// 状態出力用
+#[derive(Clone, Copy)]
+pub struct Stats {
+    pub conflicts: usize,
+    pub decisions: usize,
+    clauses: usize,
+    clauses_literals: usize,
+}
+
 /// Clause を && でつないだもの
 pub type Clauses = Vec<Clause>;
 pub struct Solver {
@@ -51,7 +60,7 @@ pub struct Solver {
     // 変数の数
     size_vars: usize,
     // 見つかった解
-    model: Vec<Option<bool>>,
+    pub model: Vec<Option<bool>>,
 
     // 探索に使う変数
     assigns: Vec<Option<bool>>,     // 各変数の暫定的な割り当てを保持, 変数の数と同じ長さ
@@ -60,6 +69,9 @@ pub struct Solver {
     trail: Vec<Option<Literal>>,    // 探索, 割り当ての履歴を記録, (もしかしたらOption外せるかも)
     trail_tail: usize,              // trail の末尾を保持(いちいちリサイズしていたら大変)
     trail_lim: Vec<usize>,          // 決定変数のtrail上のindexを持つ, 末尾が直近の決定変数
+
+    // ログ等
+    pub stats: Stats,
 }
 
 impl Solver {
@@ -75,6 +87,13 @@ impl Solver {
             trail: Vec::new(),
             trail_tail: 0,
             trail_lim: Vec::new(),
+
+            stats: Stats {
+                conflicts: 0,
+                decisions: 0,
+                clauses: 0,
+                clauses_literals: 0,
+            },
         }
     }
 
@@ -194,6 +213,8 @@ impl Solver {
     /// * `true` - 成功
     /// * `false` - バックトラック失敗, UNSAT
     fn backtrack(&mut self) -> bool {
+        self.stats.conflicts += 1;
+
         if self.dlevel() <= 0 {
             return false;
         }
@@ -219,6 +240,7 @@ impl Solver {
                 }
             } else {
                 let next = self.select_var();
+                self.stats.decisions += 1;
 
                 match next {
                     Some(next) =>{
@@ -243,21 +265,25 @@ impl Solver {
             Ok(c) => {
                 self.update_size_vars(&c);
 
-                if c.len() == 1 {
+                let literal_num = c.len();
+
+                if literal_num == 1 {
                     // 単位節
                     return self.assign_bool(c[0]);
                 } else {
                     self.clauses.push(c);
                 }
+                self.stats.clauses += 1;
+                self.stats.clauses_literals += literal_num;
                 return true;
             },
             Err(e) => match e {
                 NormalizeError::TautologyClause => {
-                    info!("Appear TautologyClause: {:?}", unnormalized_clause);
+                    debug!("Appear TautologyClause: {:?}", unnormalized_clause);
                     return true
                 },
                 NormalizeError::EmptyClause => {
-                    info!("Appear EmptyClause: {:?}", unnormalized_clause);
+                    debug!("Appear EmptyClause: {:?}", unnormalized_clause);
                     return false;
                 },
             },
@@ -265,10 +291,22 @@ impl Solver {
     }
 
     pub fn solve(&mut self) -> Option<bool> {
+        info!("==========[MINIMUMSAT]==========");
+        info!("| Conflicts |     ORIGINAL     |");
+        info!("|           | Clauses Literals |");
+        info!("================================");
+
         let mut search_status = None;
         while search_status == None {
+            info!("| {:9} | {:7} {:8} |",
+                self.stats.conflicts,
+                self.stats.clauses,
+                self.stats.clauses_literals,
+            );
+
             search_status = self.search();
         }
+        info!("================================");
 
         return search_status;
     }
