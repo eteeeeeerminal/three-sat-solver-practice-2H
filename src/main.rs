@@ -40,7 +40,8 @@ fn main() {
 
 
     if !st {
-        println!("UNSATISFIABLE");
+        // format 由来のエラーを検出するようにする
+        println!("UNSATISFIABLE (any file error)");
         return;
     }
 
