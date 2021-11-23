@@ -39,7 +39,7 @@ os.makedirs(sample_log_path, exist_ok=True)
 os.makedirs(my_log_path, exist_ok=True)
 
 for i, test_data_path in enumerate(test_data_paths):
-    log_file = f"{i}.log"
+    log_file = f"{i+1}.log"
     with open(pathlib.Path.joinpath(sample_log_path, log_file), 'w') as fp:
         subprocess.run(["./"+sample_solver, test_data_path], stdout=fp, stderr=fp)
     with open(pathlib.Path.joinpath(my_log_path, log_file), 'w') as fp:
