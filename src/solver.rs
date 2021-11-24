@@ -318,9 +318,12 @@ impl Solver {
 
                 if literal_num == 1 {
                     // 単位節
+                    self.watched_lit_indices.entry(c[0]).or_insert(HashSet::new());
+                    self.watched_lit_indices.entry(c[0].not()).or_insert(HashSet::new());
                     return self.searcher.assign_bool(c[0]);
                 } else {
                     for &lit in c.iter() {
+                        self.watched_lit_indices.entry(lit).or_insert(HashSet::new());
                         self.watched_lit_indices.entry(lit.not()).or_insert(HashSet::new());
                     }
                     self.watched_lit_indices.get_mut(&c[0].not()).unwrap().insert(self.stats.clauses);
