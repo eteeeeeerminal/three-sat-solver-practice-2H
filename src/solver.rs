@@ -228,7 +228,6 @@ impl Solver {
     fn propagate(&mut self) -> bool {
         let mut c = 0;
         while let Some(lit) = self.searcher.trail[c] {
-            // let lit = self.searcher.trail[c].unwrap();
             let false_lit = lit.not();
             let watcher = self.watched_lit_indices.get(&lit).unwrap().clone();
             'clause: for &i in watcher.iter() {
@@ -268,7 +267,7 @@ impl Solver {
             }
 
             c += 1;
-            if c == self.searcher.trail.len() {
+            if c == self.searcher.trail_tail {
                 break;
             }
         }
@@ -284,7 +283,7 @@ impl Solver {
     /// * `None` - 判定不能
     fn search(&mut self) -> Option<bool> {
         loop {
-            if self.is_falsified() {
+            if self.propagate() {
                 self.stats.conflicts += 1;
                 if !self.searcher.backtrack() {
                     // バックトラックできなくなった
@@ -321,8 +320,13 @@ impl Solver {
                     // 単位節
                     return self.searcher.assign_bool(c[0]);
                 } else {
+                    for &lit in c.iter() {
+                        self.watched_lit_indices.entry(lit.not()).or_insert(HashSet::new());
+                    }
+                    self.watched_lit_indices.get_mut(&c[0].not()).unwrap().insert(self.stats.clauses);
+                    self.watched_lit_indices.get_mut(&c[1].not()).unwrap().insert(self.stats.clauses);
+
                     self.clauses.push(c);
-                    // TODO: 監視リテラルの設定
                 }
                 self.stats.clauses += 1;
                 self.stats.clauses_literals += literal_num;
