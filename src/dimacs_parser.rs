@@ -1,5 +1,6 @@
 use crate::literal::Literal;
-use crate::solver::{Clause, Solver};
+use crate::clause::Clause;
+use crate::solver::Solver;
 
 fn is_comment_line(line: &str) -> bool {
     for c in line.chars() {

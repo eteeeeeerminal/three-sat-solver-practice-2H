@@ -2,16 +2,12 @@
 extern crate log;
 extern crate env_logger as logger;
 
-mod literal;
-mod dimacs_parser;
-mod solver;
-
 use std::{env, io::Read};
 use std::fs::File;
 use std::time::Instant;
-use solver::{Stats, Solver};
 
-use dimacs_parser::parse_dimacs;
+use three_sat_solver_practice_2_h::solver::{Stats, Solver};
+use three_sat_solver_practice_2_h::dimacs_parser::parse_dimacs;
 
 fn print_stats(stats: Stats, start_time: Instant) {
     let time = Instant::now().duration_since(start_time);

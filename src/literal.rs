@@ -1,6 +1,6 @@
 use std::cmp;
 
-#[derive(Debug, Clone, Copy, Eq)]
+#[derive(Debug, Clone, Copy, Eq, Hash)]
 pub enum Literal {
     Pos(usize),
     Neg(usize),
