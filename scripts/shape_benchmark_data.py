@@ -17,7 +17,7 @@ benchmark_input_files = list(benchmark_input.glob("*.cnf"))
 log_dirs = [p for p in log_root.iterdir() if p.is_dir()]
 
 output_text=""
-cpu_time_pattern = re.compile(r"[\s\S]*CPU time\s+:\s*([\d.]+)\s*sec[\s\S]*")
+cpu_time_pattern = re.compile(r"[\s\S]*CPU time\s+:\s*([\d.]+)\s*s[\s\S]*")
 for log_dir in log_dirs:
     solver_name = log_dir.name
     log_files = log_dir.glob("*.log")
