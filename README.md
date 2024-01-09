@@ -1,5 +1,9 @@
 # three-sat-solver-practice-2H
-minisatを参考にして作った素朴な3satソルバー
+minisatを参考にして Rust で作った素朴な3satソルバー
+
+minisat: https://github.com/niklasso/minisat
+
+授業で発表した性能比較等の資料: [./slide.pdf](./slide.pdf)
 
 # ビルド方法
 Rust の公式サイトを参考に、rustup をインストール
